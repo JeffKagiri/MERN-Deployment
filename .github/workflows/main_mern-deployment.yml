@@ -52,4 +52,4 @@ jobs:
           app-name: 'MERN-Deployment'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_8FA43003C05B482688348FC4A971FC2E }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_572DABCCA4A04A539C80A53678F869AD }}
