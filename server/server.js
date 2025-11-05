@@ -15,13 +15,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Validate required environment variables
+if (!process.env.MONGO_URI) {
+    console.error('ERROR: MONGO_URI environment variable is required');
+    process.exit(1);
+}
+
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
 .then(() => console.log('MongoDB connected successfully'))
-.catch(err => console.error('MongoDB connection error:', err));
+.catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1); // Exit if MongoDB connection fails
+});
 
 // Import API routes
 const tasksRouter = require('./routes/tasks');
@@ -31,7 +40,13 @@ app.use('/api/tasks', tasksRouter);
 
 // Health check route for Azure
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'OK', message: 'Server is running' });
+    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    res.status(200).json({ 
+        status: 'OK', 
+        message: 'Server is running',
+        database: dbStatus,
+        timestamp: new Date().toISOString()
+    });
 });
 
 // Serve React frontend in production
@@ -52,4 +67,5 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`MongoDB URI: ${process.env.MONGO_URI ? 'Set' : 'Not set'}`);
 });
